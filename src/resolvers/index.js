@@ -1,32 +1,35 @@
 const db = require('../utils/database');
+const Common = require('./Common');
+const Status = require('./status');
+const userRoles = require('./userRoles');
+const User = require('./user');
 
 module.exports = {
     Query: {
-        getAllStatus: async () => db.status.findAll(),
-        getStatus: async (obj, args, context, info) => db.status.findByPk(args.statusId),
-        getAllRoles: async () => db.userroles.findAll()
+        getAllStatus: async () => Common.getAllData(db.status),
+        getStatus: async (obj, args, context, info) => Common.getUniqueData(db.status, args.statusId),
+        getAllRoles: async () => Common.getAllData(db.userroles),
+        getRole: async (obj, args, context, info) => Common.getUniqueData(db.userroles, args.roleId),
+        getAllUsers: async () => Common.getAllData(db.users),
+        getUser: async (obj, args, context, info) => Common.getUniqueData(db.users, args.userId),
+        getPriorities: async () => Common.getAllData(db.priorities),
     },
     Mutation: {
-        createStatus: async (obj, args, context, info) => {
-            return db.status.create(args.input).then(res => {
-                return db.status.findAll().then(result => {
-                    return result;
-                });
-            });
-        },
-        updateStatus: async (obj, args, context, info) => {
-            return db.status.update(args, { where: { statusId: args.statusId } }).then(res => {
-                return db.status.findAll().then(result => {
-                    return result;
-                });
-            });
-        },
-        deleteStatus: async (obj, args, context, info) => {
-            return db.status.destroy({ where: { statusId: args.statusId } }).then(res => {
-                return db.status.findAll().then(result => {
-                    return result;
-                });
-            });
-        }
+        //Status
+        createStatus: async (obj, args, context, info) => Common.createData(db.status, args.input),
+        updateStatus: async (obj, args, context, info) => Status.updateStatus(args),
+        deleteStatus: async (obj, args, context, info) => Status.deleteStatus(args),
+
+        //User Roles
+        createUserRoles: async (obj, args, context, info) => Common.createData(db.userroles, args.input),
+        updateUserRoles: async (obj, args, context, info) => userRoles.updateRole(args),
+        deleteUserRoles: async (obj, args, context, info) => userRoles.deleteRole(args),
+
+        //Users
+        createUser: async (obj, args, context, info) => Common.createData(db.users, args.input),
+        updateUser: async (obj, args, context, info) => User.updateUser(args)
+    },
+    User: {
+        role: async (obj, args, context, info) => db.userroles.findByPk(obj.userRole)
     }
 }
